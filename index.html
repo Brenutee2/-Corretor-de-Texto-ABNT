@@ -141,16 +141,94 @@
             text-indent: 1.25cm;
         }
 
-        .abnt-format h1, .abnt-format h2, .abnt-format h3 {
-            text-align: center;
+        /* ABNT Main Sections (INTRODUÇÃO, DESENVOLVIMENTO, etc.) */
+        .abnt-format .main-section {
+            text-align: left;
             font-weight: bold;
             text-transform: uppercase;
+            margin: 24pt 0 12pt 0;
+            text-indent: 0;
+            font-size: 12pt;
+            page-break-before: auto;
+        }
+
+        /* ABNT Subsections */
+        .abnt-format .subsection {
+            text-align: left;
+            font-weight: bold;
+            margin: 18pt 0 12pt 0;
+            text-indent: 0;
+            font-size: 12pt;
+            text-transform: none;
+        }
+
+        /* Regular paragraphs */
+        .abnt-format .regular-paragraph {
+            text-indent: 1.25cm;
+            margin-bottom: 12pt;
+            text-align: justify;
+            line-height: 1.5;
+        }
+
+        /* Short citations (up to 3 lines) */
+        .abnt-format .short-citation {
+            text-indent: 1.25cm;
+            margin-bottom: 12pt;
+            text-align: justify;
+            line-height: 1.5;
+        }
+
+        /* Long citations (more than 3 lines) */
+        .abnt-format .long-citation {
+            margin-left: 4cm;
+            margin-right: 0;
+            margin-bottom: 12pt;
+            font-size: 10pt;
+            line-height: 1.0;
+            text-align: justify;
+            text-indent: 0;
+            background: #f9f9f9;
+            padding: 10px;
+            border-left: 3px solid #ddd;
+        }
+
+        /* References */
+        .abnt-format .reference {
+            text-indent: 0;
+            margin-bottom: 12pt;
+            text-align: left;
+            line-height: 1.0;
+            padding-left: 0.5cm;
+            text-indent: -0.5cm; /* Hanging indent */
+        }
+
+        /* Legacy support */
+        .abnt-format h1, .abnt-format h2, .abnt-format h3 {
+            text-align: left;
+            font-weight: bold;
             margin: 20px 0;
             text-indent: 0;
         }
 
+        .abnt-format h1 {
+            text-transform: uppercase;
+            font-size: 12pt;
+        }
+
+        .abnt-format h2 {
+            text-transform: none;
+            font-size: 12pt;
+        }
+
         .abnt-format p {
             margin-bottom: 12pt;
+            text-align: justify;
+            line-height: 1.5;
+        }
+
+        /* Emphasis for titles in references */
+        .abnt-format .reference em {
+            font-style: italic;
         }
 
         .corrections-panel {
@@ -383,7 +461,41 @@
     <div class="container">
         <div class="header">
             <h1>📝 Corretor de Texto ABNT</h1>
-            <p>Correção gramatical e formatação automática segundo as normas ABNT</p>
+            <p>Correção gramatical e formatação automática segundo as normas ABNT NBR 14724:2011</p>
+            
+            <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 20px; margin-top: 20px; text-align: left; font-size: 0.9rem;">
+                <h3 style="margin-bottom: 15px; text-align: center;">📋 Especificações ABNT Aplicadas:</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+                    <div>
+                        <strong>📄 1. Papel e Margens</strong><br>
+                        • Tamanho: A4 (21cm x 29,7cm)<br>
+                        • Superior: 3cm | Inferior: 2cm<br>
+                        • Esquerda: 3cm | Direita: 2cm
+                    </div>
+                    
+                    <div>
+                        <strong>🖋️ 2. Fonte e Espaçamento</strong><br>
+                        • Times New Roman, tamanho 12<br>
+                        • Espaçamento: 1,5 entre linhas<br>
+                        • Alinhamento: Justificado
+                    </div>
+                    
+                    <div>
+                        <strong>✍️ 3. Títulos e Formatação</strong><br>
+                        • Títulos: CAIXA ALTA, negrito<br>
+                        • Parágrafos: recuo 1,25cm<br>
+                        • Numeração de páginas
+                    </div>
+                    
+                    <div>
+                        <strong>📌 4. Citações e Referências</strong><br>
+                        • Citações curtas: entre aspas<br>
+                        • Citações longas: recuo 4cm<br>
+                        • Referências: padrão ABNT
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="main-content">
@@ -660,30 +772,224 @@ a historia do brasil começou com a chegada dos portugueses em 1500..."
         }
 
         function formatABNT(text) {
-            // Split into paragraphs
+            // Split into paragraphs and sections
             let paragraphs = text.split(/\n\s*\n/);
             let formattedText = '';
+            let sectionCounter = 1;
+            let subsectionCounter = 1;
 
-            paragraphs.forEach(paragraph => {
+            paragraphs.forEach((paragraph, index) => {
                 paragraph = paragraph.trim();
                 if (!paragraph) return;
 
-                // Check if it's a title (all caps or short line)
-                if (paragraph.length < 100 && (paragraph === paragraph.toUpperCase() || paragraph.split(' ').length <= 5)) {
-                    formattedText += `<h2>${paragraph.toUpperCase()}</h2>\n`;
-                } else {
-                    // Regular paragraph
-                    // Ensure first letter is capitalized
-                    paragraph = paragraph.charAt(0).toUpperCase() + paragraph.slice(1);
-                    // Ensure it ends with period
-                    if (!/[.!?]$/.test(paragraph)) {
-                        paragraph += '.';
-                    }
-                    formattedText += `<p>${paragraph}</p>\n`;
+                // ABNT SPECIFICATION 1: PAPEL E MARGENS (handled in CSS)
+                // A4 paper size with margins: Superior 3cm, Inferior 2cm, Esquerda 3cm, Direita 2cm
+
+                // ABNT SPECIFICATION 2: FONTE E ESPAÇAMENTO (handled in CSS)
+                // Times New Roman 12pt, 1.5 line spacing, justified alignment
+
+                // ABNT SPECIFICATION 3: ELEMENTOS DO TRABALHO
+                // Detect and format different content types according to ABNT structure
+
+                // PRÉ-TEXTUAIS: Detect cover, title page, abstract, summary elements
+                if (isPreTextualElement(paragraph)) {
+                    formattedText += `<h1 class="main-section">${paragraph.toUpperCase()}</h1>\n`;
+                }
+                
+                // TEXTUAIS: Main content sections
+                // 1. Check if it's a main section (INTRODUÇÃO, DESENVOLVIMENTO, CONCLUSÃO)
+                else if (isMainSection(paragraph)) {
+                    formattedText += `<h1 class="main-section">${sectionCounter}. ${paragraph.toUpperCase()}</h1>\n`;
+                    sectionCounter++;
+                    subsectionCounter = 1; // Reset subsection counter
+                }
+                
+                // ABNT SPECIFICATION 4: TÍTULOS E SUBTÍTULOS
+                // 2. Check if it's a subsection (numbered or not)
+                else if (isSubsection(paragraph)) {
+                    const formattedSubsection = formatSubsection(paragraph, sectionCounter - 1, subsectionCounter);
+                    formattedText += `<h2 class="subsection">${formattedSubsection}</h2>\n`;
+                    subsectionCounter++;
+                }
+                
+                // ABNT SPECIFICATION 5: CITAÇÕES
+                // 3. Long citations (more than 3 lines) - 4cm left margin, size 10, single spacing
+                else if (isLongCitation(paragraph)) {
+                    const cleanQuote = paragraph.replace(/^[""]|[""]$/g, '').trim();
+                    formattedText += `<div class="long-citation">${cleanQuote}</div>\n`;
+                }
+                
+                // 4. Short citations (up to 3 lines) - within paragraph with quotes
+                else if (isShortCitation(paragraph)) {
+                    formattedText += `<p class="short-citation">${ensureQuotes(paragraph)}</p>\n`;
+                }
+                
+                // ABNT SPECIFICATION 6: REFERÊNCIAS
+                // 5. References - hanging indent, specific formatting
+                else if (isReference(paragraph)) {
+                    formattedText += `<p class="reference">${formatReference(paragraph)}</p>\n`;
+                }
+                
+                // 6. Regular paragraphs - 1.25cm indentation, justified
+                else {
+                    const formattedParagraph = formatRegularParagraph(paragraph);
+                    formattedText += `<p class="regular-paragraph">${formattedParagraph}</p>\n`;
                 }
             });
 
             return formattedText;
+        }
+
+        // Helper functions for ABNT formatting
+
+        function isPreTextualElement(text) {
+            const preTextualElements = [
+                'CAPA', 'FOLHA DE ROSTO', 'RESUMO', 'ABSTRACT', 'SUMÁRIO', 'LISTA DE FIGURAS', 
+                'LISTA DE TABELAS', 'LISTA DE ABREVIATURAS', 'LISTA DE SÍMBOLOS'
+            ];
+            const upperText = text.toUpperCase();
+            return preTextualElements.some(element => upperText.includes(element));
+        }
+
+        function isMainSection(text) {
+            const mainSections = [
+                'INTRODUÇÃO', 'DESENVOLVIMENTO', 'CONCLUSÃO', 'CONSIDERAÇÕES FINAIS', 
+                'METODOLOGIA', 'RESULTADOS', 'DISCUSSÃO', 'REFERÊNCIAS', 'BIBLIOGRAFIA'
+            ];
+            const upperText = text.toUpperCase();
+            
+            // Check if it's a main section or looks like one (short, uppercase)
+            return mainSections.some(section => upperText.includes(section)) || 
+                   (text.length < 50 && text === text.toUpperCase() && text.split(' ').length <= 3);
+        }
+
+        function isSubsection(text) {
+            // Detect subsections: numbered (1.1, 2.1) or short titles
+            const numberedPattern = /^\d+\.\d+/;
+            const shortTitle = text.length < 100 && text.split(' ').length <= 10 && 
+                              text.charAt(0) === text.charAt(0).toUpperCase();
+            
+            return numberedPattern.test(text) || shortTitle;
+        }
+
+        function formatSubsection(text, sectionNum, subsectionNum) {
+            // ABNT: Subsections with only first letter uppercase, bold
+            if (!/^\d+\.\d+/.test(text)) {
+                // Add numbering if not present
+                text = `${sectionNum}.${subsectionNum} ${text}`;
+            }
+            return capitalizeTitle(text);
+        }
+
+        function isLongCitation(text) {
+            // Long citation: more than 3 lines (approximately 300 characters) or explicit markers
+            const hasQuotes = text.includes('"') || text.includes('"') || text.includes('"');
+            const isLong = text.length > 300;
+            const hasAuthorYear = /\([A-Z]+,\s*\d{4}\)/.test(text);
+            
+            return (hasQuotes && isLong) || hasAuthorYear;
+        }
+
+        function isShortCitation(text) {
+            // Short citation: has quotes and is less than 3 lines
+            const hasQuotes = text.includes('"') || text.includes('"') || text.includes('"');
+            const isShort = text.length <= 300;
+            
+            return hasQuotes && isShort;
+        }
+
+        function ensureQuotes(text) {
+            // Ensure proper quotation marks for short citations
+            if (!text.startsWith('"') && !text.startsWith('"')) {
+                text = '"' + text;
+            }
+            if (!text.endsWith('"') && !text.endsWith('"')) {
+                text = text + '"';
+            }
+            return text;
+        }
+
+        function formatRegularParagraph(text) {
+            // Ensure proper capitalization and punctuation
+            text = text.charAt(0).toUpperCase() + text.slice(1);
+            
+            // Ensure proper ending punctuation
+            if (!/[.!?]$/.test(text)) {
+                text += '.';
+            }
+            
+            return text;
+        }
+
+        function capitalizeTitle(title) {
+            // Capitalize first letter of each important word
+            const smallWords = ['a', 'o', 'e', 'da', 'do', 'de', 'em', 'na', 'no', 'para', 'por', 'com'];
+            return title.split(' ').map((word, index) => {
+                if (index === 0 || !smallWords.includes(word.toLowerCase())) {
+                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                }
+                return word.toLowerCase();
+            }).join(' ');
+        }
+
+        function isReference(text) {
+            // ABNT SPECIFICATION 6: REFERÊNCIAS - Detect reference patterns
+            const referencePatterns = [
+                /^[A-ZÁÊÇÕ]+,\s*[A-Za-záêçõ\s]+\./, // AUTHOR, Name. pattern
+                /\.\s*\d+\.?\s*ed\./, // Edition pattern
+                /Disponível em:/, // URL availability
+                /Acesso em:/, // Access date
+                /\d{4}\.$/, // Year ending
+                /^[A-Z][A-Z\s]+\.\s*[A-Z]/ // All caps author pattern
+            ];
+            
+            return referencePatterns.some(pattern => pattern.test(text));
+        }
+
+        function formatReference(reference) {
+            // ABNT SPECIFICATION 6: Format references according to ABNT standards
+            let formatted = reference;
+            
+            // Format book titles in italics
+            formatted = formatted.replace(/\.\s*([A-Z][^.]+[^0-9])\.\s*(\d+\.?\s*ed\.)?/g, '. <em>$1</em>. $2');
+            
+            // Format journal titles in italics
+            formatted = formatted.replace(/\.\s*([A-Z][^,]+),\s*([A-Z][^,]+),/g, '. <em>$1</em>, $2,');
+            
+            // Format edition properly
+            formatted = formatted.replace(/(\d+)\.\s*ed\./g, '$1. ed.');
+            
+            // Format location and publisher
+            formatted = formatted.replace(/\.\s*([A-Z][^:]+):\s*([A-Z][^,]+),\s*(\d{4})/g, '. $1: $2, $3');
+            
+            return formatted;
+        }
+
+        // Additional ABNT formatting functions
+
+        function addPageNumbers(content) {
+            // ABNT: Page numbers in top right corner
+            return content; // Handled in PDF generation
+        }
+
+        function formatFootnotes(text) {
+            // ABNT: Footnotes with single spacing, size 10
+            return text.replace(/\(\d+\)/g, '<sup>$&</sup>');
+        }
+
+        function validateABNTStructure(content) {
+            // Validate if content follows ABNT structure
+            const requiredSections = ['INTRODUÇÃO', 'DESENVOLVIMENTO', 'CONCLUSÃO'];
+            const hasRequiredSections = requiredSections.every(section => 
+                content.toUpperCase().includes(section)
+            );
+            
+            return {
+                isValid: hasRequiredSections,
+                missingSections: requiredSections.filter(section => 
+                    !content.toUpperCase().includes(section)
+                )
+            };
         }
 
         function displayResults(correctedText, originalText) {
@@ -1140,6 +1446,7 @@ a historia do brasil começou com a chegada dos portugueses em 1500..."
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'966ecb16a57bf1f1',t:'MTc1MzgxNDkzNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'966efda200b53289',t:'MTc1MzgxNzAwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
+
 

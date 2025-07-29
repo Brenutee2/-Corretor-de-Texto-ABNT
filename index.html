@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corretor de Texto ABNT</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .input-section h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .text-input {
+            width: 100%;
+            min-height: 300px;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: 'Times New Roman', serif;
+            line-height: 1.6;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #495057;
+            border: 2px solid #e9ecef;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+            transform: translateY(-1px);
+        }
+
+        .output-section {
+            margin-top: 30px;
+        }
+
+        .output-preview {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 30px;
+            min-height: 400px;
+            font-family: 'Times New Roman', serif;
+            font-size: 12pt;
+            line-height: 1.5;
+            text-align: justify;
+            margin-top: 20px;
+        }
+
+        .abnt-format {
+            margin: 3cm 2cm 2cm 3cm;
+            text-indent: 1.25cm;
+        }
+
+        .abnt-format h1, .abnt-format h2, .abnt-format h3 {
+            text-align: center;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 20px 0;
+            text-indent: 0;
+        }
+
+        .abnt-format p {
+            margin-bottom: 12pt;
+        }
+
+        .corrections-panel {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .corrections-panel h3 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+
+        .correction-item {
+            background: white;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
+        }
+
+        .input-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border: none;
+            background: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            color: #6c757d;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-btn:hover {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .file-upload-area {
+            border: 3px dashed #e0e0e0;
+            border-radius: 15px;
+            padding: 60px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .file-upload-area:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .file-upload-area.dragover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+
+        .file-upload-area p {
+            font-size: 1.1rem;
+            color: #6c757d;
+            margin: 10px 0;
+        }
+
+        .file-types {
+            font-size: 0.9rem !important;
+            color: #adb5bd !important;
+        }
+
+        .file-info {
+            background: #e8f5e8;
+            border: 2px solid #28a745;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .file-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .remove-file-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .remove-file-btn:hover {
+            background: #c82333;
+        }
+
+        .pdf-download-btn {
+            background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);
+            color: white;
+        }
+
+        .pdf-download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(220, 53, 69, 0.3);
+        }
+
+        .word-download-btn {
+            background: linear-gradient(135deg, #2b5797 0%, #1e4176 100%);
+            color: white;
+        }
+
+        .word-download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(43, 87, 151, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .btn {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📝 Corretor de Texto ABNT</h1>
+            <p>Correção gramatical e formatação automática segundo as normas ABNT</p>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <div class="input-tabs">
+                    <button class="tab-btn active" onclick="switchTab('text')">📝 Texto</button>
+                    <button class="tab-btn" onclick="switchTab('file')">📄 Arquivo</button>
+                </div>
+                
+                <div id="textTab" class="tab-content active">
+                    <h2>Cole seu texto aqui:</h2>
+                    <textarea 
+                        id="inputText" 
+                        class="text-input" 
+                        placeholder="Cole aqui o texto que deseja corrigir e formatar segundo as normas ABNT...
+
+Exemplo:
+o brasil e um pais muito grande. ele tem muitas riquezas naturais, como a floresta amazonica.
+
+HISTORIA DO BRASIL
+
+a historia do brasil começou com a chegada dos portugueses em 1500..."
+                    ></textarea>
+                </div>
+
+                <div id="fileTab" class="tab-content">
+                    <h2>Envie seu arquivo:</h2>
+                    <div class="file-upload-area" id="fileUploadArea">
+                        <div class="upload-icon">📄</div>
+                        <p>Arraste e solte seu arquivo aqui ou clique para selecionar</p>
+                        <p class="file-types">Suporta: DOC, DOCX, PDF, TXT</p>
+                        <input type="file" id="fileInput" accept=".doc,.docx,.pdf,.txt" style="display: none;">
+                    </div>
+                    <div id="fileInfo" class="file-info" style="display: none;">
+                        <div class="file-details">
+                            <span id="fileName"></span>
+                            <button class="remove-file-btn" onclick="removeFile()">✕</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-primary" onclick="processText()">
+                    ✨ Corrigir e Formatar
+                </button>
+                <button class="btn btn-secondary" onclick="clearText()">
+                    🗑️ Limpar
+                </button>
+                <button class="btn download-btn" onclick="downloadText()" id="downloadBtn" style="display: none;">
+                    📄 Baixar HTML
+                </button>
+                <button class="btn pdf-download-btn" onclick="downloadPDF()" id="pdfDownloadBtn" style="display: none;">
+                    📑 Baixar PDF
+                </button>
+                <button class="btn word-download-btn" onclick="downloadWord()" id="wordDownloadBtn" style="display: none;">
+                    📄 Baixar Word
+                </button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Processando texto...</p>
+            </div>
+
+            <div class="stats" id="stats" style="display: none;">
+                <div class="stat-card">
+                    <div class="stat-number" id="wordCount">0</div>
+                    <div class="stat-label">Palavras</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="charCount">0</div>
+                    <div class="stat-label">Caracteres</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="correctionCount">0</div>
+                    <div class="stat-label">Correções</div>
+                </div>
+            </div>
+
+            <div class="corrections-panel" id="correctionsPanel">
+                <h3>📋 Correções Realizadas:</h3>
+                <div id="correctionsList"></div>
+            </div>
+
+            <div class="output-section">
+                <h2>Texto Corrigido e Formatado (ABNT):</h2>
+                <div class="output-preview abnt-format" id="outputText">
+                    <p><em>O texto corrigido e formatado aparecerá aqui...</em></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        let corrections = [];
+        let currentFile = null;
+
+        function switchTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tab + 'Tab').classList.add('active');
+        }
+
+        function processText() {
+            const activeTab = document.querySelector('.tab-content.active').id;
+            let inputText = '';
+
+            if (activeTab === 'textTab') {
+                inputText = document.getElementById('inputText').value.trim();
+                if (!inputText) {
+                    alert('Por favor, cole um texto para processar.');
+                    return;
+                }
+            } else if (activeTab === 'fileTab') {
+                if (!currentFile) {
+                    alert('Por favor, selecione um arquivo para processar.');
+                    return;
+                }
+                // File text will be processed from the uploaded file
+                processFile();
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('stats').style.display = 'none';
+            document.getElementById('correctionsPanel').style.display = 'none';
+
+            // Simulate processing delay
+            setTimeout(() => {
+                const correctedText = correctAndFormatText(inputText);
+                displayResults(correctedText, inputText);
+                document.getElementById('loading').style.display = 'none';
+            }, 1500);
+        }
+
+        function processFile() {
+            if (!currentFile) return;
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('stats').style.display = 'none';
+            document.getElementById('correctionsPanel').style.display = 'none';
+
+            const fileType = currentFile.type;
+            const fileName = currentFile.name.toLowerCase();
+
+            if (fileName.endsWith('.txt')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const text = e.target.result;
+                    setTimeout(() => {
+                        const correctedText = correctAndFormatText(text);
+                        displayResults(correctedText, text);
+                        document.getElementById('loading').style.display = 'none';
+                    }, 1500);
+                };
+                reader.readAsText(currentFile);
+            } else if (fileName.endsWith('.docx')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    mammoth.extractRawText({arrayBuffer: e.target.result})
+                        .then(function(result) {
+                            const text = result.value;
+                            setTimeout(() => {
+                                const correctedText = correctAndFormatText(text);
+                                displayResults(correctedText, text);
+                                document.getElementById('loading').style.display = 'none';
+                            }, 1500);
+                        })
+                        .catch(function(error) {
+                            alert('Erro ao processar arquivo DOCX: ' + error.message);
+                            document.getElementById('loading').style.display = 'none';
+                        });
+                };
+                reader.readAsArrayBuffer(currentFile);
+            } else if (fileName.endsWith('.pdf')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const typedarray = new Uint8Array(e.target.result);
+                    
+                    pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
+                        let textContent = '';
+                        let pagePromises = [];
+                        
+                        for (let i = 1; i <= pdf.numPages; i++) {
+                            pagePromises.push(
+                                pdf.getPage(i).then(function(page) {
+                                    return page.getTextContent().then(function(content) {
+                                        return content.items.map(item => item.str).join(' ');
+                                    });
+                                })
+                            );
+                        }
+                        
+                        Promise.all(pagePromises).then(function(pages) {
+                            textContent = pages.join('\n\n');
+                            setTimeout(() => {
+                                const correctedText = correctAndFormatText(textContent);
+                                displayResults(correctedText, textContent);
+                                document.getElementById('loading').style.display = 'none';
+                            }, 1500);
+                        });
+                    }).catch(function(error) {
+                        alert('Erro ao processar arquivo PDF: ' + error.message);
+                        document.getElementById('loading').style.display = 'none';
+                    });
+                };
+                reader.readAsArrayBuffer(currentFile);
+            } else {
+                alert('Tipo de arquivo não suportado. Use DOC, DOCX, PDF ou TXT.');
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function correctAndFormatText(text) {
+            corrections = [];
+            let correctedText = text;
+
+            // Common Portuguese corrections
+            const corrections_rules = [
+                // Capitalization
+                { pattern: /\b(brasil|portugal|são paulo|rio de janeiro|minas gerais)\b/gi, replacement: (match) => capitalizeProperNoun(match), type: 'Capitalização de nomes próprios' },
+                
+                // Common spelling errors
+                { pattern: /\bmas\b(?=\s+[aeiou])/gi, replacement: 'mais', type: 'Correção: mas → mais' },
+                { pattern: /\bmais\b(?=\s+(não|nunca|nada))/gi, replacement: 'mas', type: 'Correção: mais → mas' },
+                { pattern: /\be\b(?=\s+[aeiouáéíóú])/gi, replacement: 'é', type: 'Correção: e → é (verbo ser)' },
+                { pattern: /\bpq\b/gi, replacement: 'porque', type: 'Correção: pq → porque' },
+                { pattern: /\bvc\b/gi, replacement: 'você', type: 'Correção: vc → você' },
+                { pattern: /\btb\b/gi, replacement: 'também', type: 'Correção: tb → também' },
+                { pattern: /\bqdo\b/gi, replacement: 'quando', type: 'Correção: qdo → quando' },
+                
+                // Accent corrections
+                { pattern: /\bvoce\b/gi, replacement: 'você', type: 'Correção de acentuação: voce → você' },
+                { pattern: /\bpais\b(?=\s)/gi, replacement: 'país', type: 'Correção de acentuação: pais → país' },
+                { pattern: /\bhistoria\b/gi, replacement: 'história', type: 'Correção de acentuação: historia → história' },
+                { pattern: /\bamazonica\b/gi, replacement: 'amazônica', type: 'Correção de acentuação: amazonica → amazônica' },
+                
+                // Grammar corrections
+                { pattern: /\ba\s+(\d+)\s+anos/gi, replacement: 'há $1 anos', type: 'Correção: a → há (tempo passado)' },
+                { pattern: /\bonde\b(?=\s+(eu|você|ele|ela|nós|vocês|eles|elas)\s+(vai|vou|vamos))/gi, replacement: 'aonde', type: 'Correção: onde → aonde (movimento)' },
+            ];
+
+            corrections_rules.forEach(rule => {
+                const matches = correctedText.match(rule.pattern);
+                if (matches) {
+                    matches.forEach(match => {
+                        corrections.push({
+                            original: match,
+                            corrected: typeof rule.replacement === 'function' ? rule.replacement(match) : rule.replacement,
+                            type: rule.type
+                        });
+                    });
+                    correctedText = correctedText.replace(rule.pattern, rule.replacement);
+                }
+            });
+
+            // Format according to ABNT
+            correctedText = formatABNT(correctedText);
+
+            return correctedText;
+        }
+
+        function capitalizeProperNoun(word) {
+            return word.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+        }
+
+        function formatABNT(text) {
+            // Split into paragraphs
+            let paragraphs = text.split(/\n\s*\n/);
+            let formattedText = '';
+
+            paragraphs.forEach(paragraph => {
+                paragraph = paragraph.trim();
+                if (!paragraph) return;
+
+                // Check if it's a title (all caps or short line)
+                if (paragraph.length < 100 && (paragraph === paragraph.toUpperCase() || paragraph.split(' ').length <= 5)) {
+                    formattedText += `<h2>${paragraph.toUpperCase()}</h2>\n`;
+                } else {
+                    // Regular paragraph
+                    // Ensure first letter is capitalized
+                    paragraph = paragraph.charAt(0).toUpperCase() + paragraph.slice(1);
+                    // Ensure it ends with period
+                    if (!/[.!?]$/.test(paragraph)) {
+                        paragraph += '.';
+                    }
+                    formattedText += `<p>${paragraph}</p>\n`;
+                }
+            });
+
+            return formattedText;
+        }
+
+        function displayResults(correctedText, originalText) {
+            document.getElementById('outputText').innerHTML = correctedText;
+            
+            // Update stats
+            const wordCount = correctedText.replace(/<[^>]*>/g, '').split(/\s+/).filter(word => word.length > 0).length;
+            const charCount = correctedText.replace(/<[^>]*>/g, '').length;
+            
+            document.getElementById('wordCount').textContent = wordCount;
+            document.getElementById('charCount').textContent = charCount;
+            document.getElementById('correctionCount').textContent = corrections.length;
+            
+            document.getElementById('stats').style.display = 'grid';
+            
+            // Show corrections
+            if (corrections.length > 0) {
+                const correctionsList = document.getElementById('correctionsList');
+                correctionsList.innerHTML = corrections.map(correction => 
+                    `<div class="correction-item">
+                        <strong>${correction.type}:</strong> "${correction.original}" → "${correction.corrected}"
+                    </div>`
+                ).join('');
+                document.getElementById('correctionsPanel').style.display = 'block';
+            }
+            
+            document.getElementById('downloadBtn').style.display = 'inline-flex';
+            document.getElementById('pdfDownloadBtn').style.display = 'inline-flex';
+            document.getElementById('wordDownloadBtn').style.display = 'inline-flex';
+        }
+
+        function downloadPDF() {
+            const outputText = document.getElementById('outputText').innerHTML;
+            if (!outputText || outputText.includes('<em>')) {
+                alert('Nenhum texto processado para download.');
+                return;
+            }
+
+            // Create PDF using jsPDF with A4 format
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            
+            // ABNT margins: 3cm left/top, 2cm right/bottom
+            const margins = {
+                left: 30,    // 3cm
+                right: 20,   // 2cm  
+                top: 30,     // 3cm
+                bottom: 20   // 2cm
+            };
+            
+            const pageWidth = 210; // A4 width in mm
+            const pageHeight = 297; // A4 height in mm
+            const textWidth = pageWidth - margins.left - margins.right;
+            
+            // Set default font (Times New Roman equivalent)
+            doc.setFont('times', 'normal');
+            doc.setFontSize(12);
+            
+            // Line height for 1.5 spacing (ABNT standard)
+            const lineHeight = 6; // mm
+            const paragraphSpacing = 12; // mm between paragraphs
+            
+            let yPosition = margins.top;
+            
+            // Convert HTML to structured content
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = outputText;
+            
+            // Function to add new page if needed
+            function checkPageBreak(requiredSpace = 20) {
+                if (yPosition + requiredSpace > pageHeight - margins.bottom) {
+                    doc.addPage();
+                    yPosition = margins.top;
+                    return true;
+                }
+                return false;
+            }
+            
+            // Function to justify text (basic implementation)
+            function justifyText(text, width, fontSize) {
+                doc.setFontSize(fontSize);
+                const words = text.split(' ');
+                if (words.length <= 1) return [text];
+                
+                const lines = [];
+                let currentLine = '';
+                
+                words.forEach(word => {
+                    const testLine = currentLine ? currentLine + ' ' + word : word;
+                    const testWidth = doc.getTextWidth(testLine);
+                    
+                    if (testWidth <= width) {
+                        currentLine = testLine;
+                    } else {
+                        if (currentLine) {
+                            lines.push(currentLine);
+                            currentLine = word;
+                        } else {
+                            lines.push(word);
+                        }
+                    }
+                });
+                
+                if (currentLine) {
+                    lines.push(currentLine);
+                }
+                
+                return lines;
+            }
+            
+            // Function to add justified paragraph
+            function addJustifiedParagraph(text, isFirstParagraph = false) {
+                const indentWidth = isFirstParagraph ? 0 : 12.5; // 1.25cm indent for continuation paragraphs
+                const availableWidth = textWidth - indentWidth;
+                
+                const lines = justifyText(text, availableWidth, 12);
+                
+                lines.forEach((line, index) => {
+                    checkPageBreak();
+                    
+                    const xPosition = margins.left + (index === 0 ? indentWidth : indentWidth);
+                    
+                    // For justified text, add extra spacing between words (except last line)
+                    if (index < lines.length - 1 && line.split(' ').length > 1) {
+                        const words = line.split(' ');
+                        const totalTextWidth = words.reduce((sum, word) => sum + doc.getTextWidth(word), 0);
+                        const totalSpaces = words.length - 1;
+                        const spaceWidth = totalSpaces > 0 ? (availableWidth - totalTextWidth) / totalSpaces : 0;
+                        
+                        let currentX = xPosition;
+                        words.forEach((word, wordIndex) => {
+                            doc.text(word, currentX, yPosition);
+                            if (wordIndex < words.length - 1) {
+                                currentX += doc.getTextWidth(word) + spaceWidth;
+                            }
+                        });
+                    } else {
+                        // Last line or single word - left aligned
+                        doc.text(line, xPosition, yPosition);
+                    }
+                    
+                    yPosition += lineHeight;
+                });
+                
+                yPosition += paragraphSpacing;
+            }
+            
+            // Function to add centered title
+            function addCenteredTitle(text) {
+                checkPageBreak(30);
+                
+                doc.setFont('times', 'bold');
+                doc.setFontSize(14);
+                
+                const titleLines = doc.splitTextToSize(text.toUpperCase(), textWidth);
+                
+                titleLines.forEach(line => {
+                    const textWidth_line = doc.getTextWidth(line);
+                    const xPosition = (pageWidth - textWidth_line) / 2;
+                    doc.text(line, xPosition, yPosition);
+                    yPosition += lineHeight + 2;
+                });
+                
+                yPosition += paragraphSpacing;
+                
+                // Reset to normal font
+                doc.setFont('times', 'normal');
+                doc.setFontSize(12);
+            }
+            
+            // Add page numbers (ABNT standard - top right)
+            function addPageNumbers() {
+                const totalPages = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(10);
+                    doc.text(i.toString(), pageWidth - margins.right - 10, margins.top - 10);
+                }
+                doc.setFontSize(12); // Reset font size
+            }
+            
+            // Process content
+            const elements = tempDiv.children;
+            let isFirstElement = true;
+            
+            for (let i = 0; i < elements.length; i++) {
+                const element = elements[i];
+                
+                if (element.tagName === 'H1' || element.tagName === 'H2' || element.tagName === 'H3') {
+                    addCenteredTitle(element.textContent);
+                    isFirstElement = false;
+                } else if (element.tagName === 'P') {
+                    const paragraphText = element.textContent.trim();
+                    if (paragraphText) {
+                        addJustifiedParagraph(paragraphText, isFirstElement);
+                        isFirstElement = false;
+                    }
+                }
+            }
+            
+            // Add page numbers
+            addPageNumbers();
+            
+            // Add metadata
+            doc.setProperties({
+                title: 'Documento Formatado ABNT',
+                subject: 'Texto corrigido e formatado segundo normas ABNT',
+                author: 'Corretor de Texto ABNT',
+                creator: 'Corretor de Texto ABNT',
+                producer: 'jsPDF'
+            });
+            
+            // Save with timestamp
+            const now = new Date();
+            const timestamp = now.toISOString().slice(0, 19).replace(/:/g, '-');
+            doc.save(`documento_abnt_${timestamp}.pdf`);
+        }
+
+        function downloadWord() {
+            const outputText = document.getElementById('outputText').innerHTML;
+            if (!outputText || outputText.includes('<em>')) {
+                alert('Nenhum texto processado para download.');
+                return;
+            }
+
+            // Convert HTML to Word-compatible format
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = outputText;
+            
+            let wordContent = '';
+            
+            // Process each element for Word format
+            const elements = tempDiv.children;
+            for (let i = 0; i < elements.length; i++) {
+                const element = elements[i];
+                
+                if (element.tagName === 'H1' || element.tagName === 'H2' || element.tagName === 'H3') {
+                    // Title formatting for Word
+                    wordContent += `<p style="text-align: center; font-weight: bold; text-transform: uppercase; margin: 20px 0; font-size: 14pt;">${element.textContent}</p>\n`;
+                } else if (element.tagName === 'P') {
+                    // Paragraph formatting for Word with ABNT standards
+                    const paragraphText = element.textContent.trim();
+                    if (paragraphText) {
+                        wordContent += `<p style="text-align: justify; text-indent: 1.25cm; margin-bottom: 12pt; font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.5;">${paragraphText}</p>\n`;
+                    }
+                }
+            }
+
+            // Create complete Word document with ABNT formatting
+            const wordDocument = `
+<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+    <meta charset="utf-8">
+    <title>Documento ABNT</title>
+    <!--[if gte mso 9]>
+    <xml>
+        <w:WordDocument>
+            <w:View>Print</w:View>
+            <w:Zoom>90</w:Zoom>
+            <w:DoNotPromptForConvert/>
+            <w:DoNotShowInsertionsAndDeletions/>
+        </w:WordDocument>
+    </xml>
+    <![endif]-->
+    <style>
+        @page {
+            margin: 3cm 2cm 2cm 3cm; /* ABNT margins */
+            size: A4;
+        }
+        body {
+            font-family: 'Times New Roman', serif;
+            font-size: 12pt;
+            line-height: 1.5;
+            text-align: justify;
+            margin: 0;
+            padding: 0;
+        }
+        p {
+            margin-bottom: 12pt;
+            text-align: justify;
+        }
+        .title {
+            text-align: center;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 20px 0;
+            text-indent: 0 !important;
+            font-size: 14pt;
+        }
+        .paragraph {
+            text-indent: 1.25cm;
+            text-align: justify;
+            margin-bottom: 12pt;
+        }
+    </style>
+</head>
+<body>
+    ${wordContent}
+</body>
+</html>`;
+
+            // Create blob and download
+            const blob = new Blob([wordDocument], { 
+                type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
+            });
+            
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            
+            // Generate filename with timestamp
+            const now = new Date();
+            const timestamp = now.toISOString().slice(0, 19).replace(/:/g, '-');
+            a.download = `documento_abnt_${timestamp}.doc`;
+            
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function clearText() {
+            document.getElementById('inputText').value = '';
+            document.getElementById('outputText').innerHTML = '<p><em>O texto corrigido e formatado aparecerá aqui...</em></p>';
+            document.getElementById('stats').style.display = 'none';
+            document.getElementById('correctionsPanel').style.display = 'none';
+            document.getElementById('downloadBtn').style.display = 'none';
+            document.getElementById('pdfDownloadBtn').style.display = 'none';
+            document.getElementById('wordDownloadBtn').style.display = 'none';
+            corrections = [];
+            currentFile = null;
+            document.getElementById('fileInfo').style.display = 'none';
+            document.getElementById('fileUploadArea').style.display = 'block';
+        }
+
+        function removeFile() {
+            currentFile = null;
+            document.getElementById('fileInfo').style.display = 'none';
+            document.getElementById('fileUploadArea').style.display = 'block';
+        }
+
+        function downloadText() {
+            const outputText = document.getElementById('outputText').innerHTML;
+            if (!outputText || outputText.includes('<em>')) {
+                alert('Nenhum texto processado para download.');
+                return;
+            }
+
+            // Create a more complete HTML document for download
+            const fullDocument = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Documento Formatado ABNT</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            font-size: 12pt;
+            line-height: 1.5;
+            margin: 3cm 2cm 2cm 3cm;
+            text-align: justify;
+        }
+        p {
+            text-indent: 1.25cm;
+            margin-bottom: 12pt;
+        }
+        h1, h2, h3 {
+            text-align: center;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 20px 0;
+            text-indent: 0;
+        }
+    </style>
+</head>
+<body>
+    ${outputText}
+</body>
+</html>`;
+
+            const blob = new Blob([fullDocument], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'documento_abnt_corrigido.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Auto-resize textarea
+        document.getElementById('inputText').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.max(300, this.scrollHeight) + 'px';
+        });
+
+        // File upload functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const fileInfo = document.getElementById('fileInfo');
+            const fileName = document.getElementById('fileName');
+
+            // Click to select file
+            fileUploadArea.addEventListener('click', function() {
+                fileInput.click();
+            });
+
+            // File input change
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    handleFile(file);
+                }
+            });
+
+            // Drag and drop
+            fileUploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                fileUploadArea.classList.add('dragover');
+            });
+
+            fileUploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                fileUploadArea.classList.remove('dragover');
+            });
+
+            fileUploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                fileUploadArea.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFile(files[0]);
+                }
+            });
+
+            function handleFile(file) {
+                const allowedTypes = ['.doc', '.docx', '.pdf', '.txt'];
+                const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+                
+                if (!allowedTypes.includes(fileExtension)) {
+                    alert('Tipo de arquivo não suportado. Use DOC, DOCX, PDF ou TXT.');
+                    return;
+                }
+
+                currentFile = file;
+                fileName.textContent = file.name;
+                fileUploadArea.style.display = 'none';
+                fileInfo.style.display = 'block';
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'966ecb16a57bf1f1',t:'MTc1MzgxNDkzNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
+
